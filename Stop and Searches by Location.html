@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Stop and Searches by Location</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #111;
+      color: #fff;
+    }
+
+    header {
+      background: #000;
+      border-bottom: 3px solid #FFD700;
+      padding: 15px 30px;
+      text-align: center;
+    }
+
+    header h1 {
+      color: #FFD700;
+      margin: 0;
+      font-size: 1.8em;
+      animation: slideDown 1s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {transform: translateY(-50px); opacity: 0;}
+      to {transform: translateY(0); opacity: 1;}
+    }
+
+    a.back-link {
+      display: inline-block;
+      margin: 15px 30px;
+      color: #FFD700;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+
+    a.back-link:hover {
+      color: #fff;
+    }
+
+    .form-group {
+      margin: 20px 30px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    input {
+      padding: 6px;
+      margin-top: 4px;
+      width: 200px;
+      border-radius: 5px;
+      border: none;
+      outline: none;
+    }
+
+    button {
+      padding: 8px 15px;
+      margin-top: 10px;
+      background: #FFD700;
+      color: #000;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    .result {
+      background: #222;
+      margin: 20px 30px;
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #444;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+      display: none;
+    }
+
+    .result h2 {
+      color: #FFD700;
+      margin-top: 0;
+    }
+
+    .search-item {
+      border: 1px solid #444;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 5px;
+      background: #111;
+    }
+
+    .search-item strong {
+      color: #FFD700;
+    }
+
+    @media (max-width: 600px) {
+      input {
+        width: 100%;
+      }
+      .result, .form-group {
+        margin: 20px 10px;
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Stop and Searches by Location</h1>
+  </header>
+
+  <a class="back-link" href="index.html"><i class="fas fa-arrow-left"></i> Back to Main Page</a>
+
+  <div class="form-group">
+    <form id="stopLocationForm">
+      <label>
+        Location ID:
+        <input type="number" id="location_id" placeholder="e.g., 1609590" required>
+      </label>
+      <label>
+        Date (YYYY-MM, optional):
+        <input type="month" id="date">
+      </label>
+      <button type="submit"><i class="fas fa-search"></i> Fetch Stop and Searches</button>
+    </form>
+  </div>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    document.getElementById('stopLocationForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const locationId = document.getElementById('location_id').value.trim();
+      const date = document.getElementById('date').value;
+
+      if (!locationId) {
+        alert("Please enter a location ID.");
+        return;
+      }
+
+      let url = `https://data.police.uk/api/stops-at-location?location_id=${encodeURIComponent(locationId)}`;
+      if (date) url += `&date=${date}`;
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Network response was not ok.");
+        const data = await res.json();
+
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = `<h2>Results (${data.length} found)</h2>`;
+
+        data.forEach(item => {
+          const searchItem = document.createElement('div');
+          searchItem.className = 'search-item';
+          searchItem.innerHTML = `
+            <strong>Date & Time:</strong> ${item.datetime}<br>
+            <strong>Type:</strong> ${item.type}<br>
+            <strong>Street:</strong> ${item.location?.street?.name || 'N/A'}<br>
+            <strong>Age Range:</strong> ${item.age_range || 'N/A'}<br>
+            <strong>Gender:</strong> ${item.gender || 'N/A'}<br>
+            <strong>Self-defined Ethnicity:</strong> ${item.self_defined_ethnicity || 'N/A'}<br>
+            <strong>Officer-defined Ethnicity:</strong> ${item.officer_defined_ethnicity || 'N/A'}<br>
+            <strong>Object of Search:</strong> ${item.object_of_search || 'N/A'}<br>
+            <strong>Legislation:</strong> ${item.legislation || 'N/A'}<br>
+            <strong>Outcome:</strong> ${item.outcome || 'N/A'}<br>
+            <strong>Removal of More Than Outer Clothing:</strong> ${item.removal_of_more_than_outer_clothing}
+          `;
+          resultDiv.appendChild(searchItem);
+        });
+
+        resultDiv.style.display = 'block';
+      } catch (err) {
+        alert("Error fetching data: " + err.message);
+      }
+    });
+  </script>
+</body>
+</html>

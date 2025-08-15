@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Locate a Neighbourhood - UK Police API</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #111;
+      color: #fff;
+    }
+
+    header {
+      background: #000;
+      border-bottom: 3px solid #FFD700;
+      padding: 15px 30px;
+      text-align: center;
+    }
+
+    header h1 {
+      color: #FFD700;
+      margin: 0;
+      font-size: 1.8em;
+      animation: slideDown 1s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {transform: translateY(-50px); opacity: 0;}
+      to {transform: translateY(0); opacity: 1;}
+    }
+
+    a.back-link {
+      display: inline-block;
+      margin: 15px 30px;
+      color: #FFD700;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+
+    a.back-link:hover {
+      color: #fff;
+    }
+
+    .form-group {
+      margin: 20px 30px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    input {
+      padding: 6px;
+      margin-top: 4px;
+      width: 250px;
+      border-radius: 5px;
+      border: none;
+      outline: none;
+    }
+
+    button {
+      padding: 8px 15px;
+      margin-top: 10px;
+      background: #FFD700;
+      color: #000;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    .result {
+      background: #222;
+      margin: 20px 30px;
+      padding: 20px;
+      border-radius: 10px;
+      border: 1px solid #444;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+      display: none;
+    }
+
+    .result h2 {
+      color: #FFD700;
+      margin-top: 0;
+    }
+
+    .result p {
+      margin: 5px 0;
+      color: #fff;
+    }
+
+    @media (max-width: 600px) {
+      input {
+        width: 100%;
+      }
+
+      .result, .form-group {
+        margin: 20px 10px;
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Locate a Neighbourhood</h1>
+  </header>
+
+  <a class="back-link" href="index.html"><i class="fas fa-arrow-left"></i> Back to Main Page</a>
+
+  <div class="form-group">
+    <form id="locateForm">
+      <label>
+        Latitude,Longitude (e.g., 51.500617,-0.124629):
+        <input type="text" id="coords" placeholder="Enter latitude,longitude">
+      </label>
+      <button type="submit"><i class="fas fa-map-marker-alt"></i> Find Neighbourhood</button>
+    </form>
+  </div>
+
+  <div class="result" id="result">
+    <h2>Neighbourhood Info</h2>
+    <p><strong>Force:</strong> <span id="force"></span></p>
+    <p><strong>Neighbourhood ID:</strong> <span id="neighbourhood"></span></p>
+  </div>
+
+  <script>
+    document.getElementById('locateForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const coords = document.getElementById('coords').value.trim();
+      if (!coords || !coords.includes(',')) {
+        alert("Please enter valid latitude and longitude separated by a comma.");
+        return;
+      }
+
+      const url = `https://data.police.uk/api/locate-neighbourhood?q=${coords}`;
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Network response was not ok.");
+        const data = await res.json();
+
+        document.getElementById('force').textContent = data.force || "N/A";
+        document.getElementById('neighbourhood').textContent = data.neighbourhood || "N/A";
+        document.getElementById('result').style.display = 'block';
+      } catch (err) {
+        alert("Error fetching data: " + err.message);
+      }
+    });
+  </script>
+</body>
+</html>

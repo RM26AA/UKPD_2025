@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Senior Officers - UK Police API</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        /* Basic Reset & Body */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            background: #111;
+            color: #fff;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #000;
+            padding: 15px 30px;
+            border-bottom: 3px solid #FFD700;
+            animation: slideDown 1s ease-out;
+        }
+
+        header img {
+            height: 50px;
+        }
+
+        header h1 {
+            color: #FFD700;
+            font-size: 1.8em;
+        }
+
+        @keyframes slideDown {
+            from {transform: translateY(-50px); opacity: 0;}
+            to {transform: translateY(0); opacity: 1;}
+        }
+
+        /* Back Link */
+        a.back-link {
+            display: inline-block;
+            margin: 15px 30px;
+            color: #FFD700;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        a.back-link:hover {
+            color: #fff;
+        }
+
+        /* Form */
+        .form-container {
+            margin: 20px 30px;
+            padding: 20px;
+            background: #222;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-container input {
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+            width: 200px;
+        }
+
+        .form-container button {
+            padding: 8px 15px;
+            background: #FFD700;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        .form-container button:hover {
+            transform: scale(1.05);
+        }
+
+        label {
+            font-weight: bold;
+            color: #FFD700;
+            margin-right: 10px;
+        }
+
+        /* Officer Cards */
+        .officer-card {
+            background: #222;
+            border: 1px solid #FFD700;
+            border-radius: 10px;
+            margin: 20px 30px;
+            padding: 15px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .officer-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px #FFD700;
+        }
+
+        .officer-card h3 {
+            margin: 0;
+            color: #FFD700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .officer-card p {
+            color: #ddd;
+        }
+
+        /* Loading & Errors */
+        .error {
+            color: #FF4C4C;
+            margin: 20px 30px;
+            font-weight: bold;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .form-container {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="UKPD_1.png" alt="Logo"> <!-- Add your logo image here -->
+        <h1>UK Police Senior Officers</h1>
+    </header>
+
+    <a class="back-link" href="index.html"><i class="fas fa-arrow-left"></i> Back to Main Page</a>
+
+    <div class="form-container">
+        <label for="forceId"><i class="fas fa-shield-alt"></i> Force ID:</label>
+        <input type="text" id="forceId" placeholder="e.g. leicestershire">
+        <button id="fetchOfficersBtn"><i class="fas fa-search"></i> Fetch Officers</button>
+    </div>
+
+    <div id="officersOutput"></div>
+
+    <script>
+        document.getElementById('fetchOfficersBtn').addEventListener('click', async () => {
+            const forceId = document.getElementById('forceId').value.trim();
+            const output = document.getElementById('officersOutput');
+
+            if (!forceId) {
+                output.innerHTML = '<p class="error">Please enter a Force ID.</p>';
+                return;
+            }
+
+            output.innerHTML = "<p style='margin:20px 30px;'>Loading...</p>";
+
+            try {
+                const res = await fetch(`https://data.police.uk/api/forces/${forceId}/people`);
+                if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+
+                const data = await res.json();
+
+                if (data.length === 0) {
+                    output.innerHTML = "<p class='error'>No senior officers found for this force.</p>";
+                    return;
+                }
+
+                output.innerHTML = data.map(officer => `
+                    <div class="officer-card">
+                        <h3><i class="fas fa-user-tie"></i> ${officer.name} - ${officer.rank}</h3>
+                        <p>${officer.bio || "No biography available."}</p>
+                    </div>
+                `).join("");
+
+            } catch (error) {
+                output.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>

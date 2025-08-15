@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Specific Neighbourhood - UK Police API</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #111;
+      color: #fff;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #000;
+      padding: 15px 30px;
+      border-bottom: 3px solid #FFD700;
+      animation: slideDown 1s ease-out;
+    }
+
+    header h1 {
+      color: #FFD700;
+      font-size: 1.8em;
+    }
+
+    @keyframes slideDown {
+      from {transform: translateY(-50px); opacity: 0;}
+      to {transform: translateY(0); opacity: 1;}
+    }
+
+    a.back-link {
+      display: inline-block;
+      margin: 15px 30px;
+      color: #FFD700;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+
+    a.back-link:hover {
+      color: #fff;
+    }
+
+    .form-group {
+      margin: 20px 30px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    input {
+      padding: 6px;
+      margin-top: 4px;
+      width: 220px;
+      border-radius: 5px;
+      border: none;
+      outline: none;
+    }
+
+    button {
+      padding: 8px 15px;
+      margin-top: 10px;
+      background: #FFD700;
+      color: #000;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    .result {
+      background: #222;
+      margin: 20px 30px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+    }
+
+    .result h2 {
+      color: #FFD700;
+    }
+
+    .result p, .result a {
+      color: #fff;
+      margin: 6px 0;
+    }
+
+    .result a {
+      color: #FFD700;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+
+    .result a:hover {
+      color: #fff;
+    }
+
+    .links ul {
+      padding-left: 20px;
+    }
+
+    .links li a {
+      color: #FFD700;
+    }
+
+    .links li a:hover {
+      color: #fff;
+    }
+
+    @media (max-width: 600px) {
+      input {
+        width: 100%;
+      }
+
+      .result {
+        margin: 20px 10px;
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Specific Neighbourhood</h1>
+  </header>
+
+  <a class="back-link" href="index.html"><i class="fas fa-arrow-left"></i> Back to Main Page</a>
+
+  <div class="form-group">
+    <form id="neighbourhoodForm">
+      <label>
+        Police Force (e.g., leicestershire):
+        <input type="text" id="force" placeholder="Enter police force">
+      </label>
+      <label>
+        Neighbourhood ID (e.g., NC04):
+        <input type="text" id="neighbourhood" placeholder="Enter neighbourhood ID">
+      </label>
+      <button type="submit"><i class="fas fa-search-location"></i> Get Neighbourhood Info</button>
+    </form>
+  </div>
+
+  <div class="result" id="result" style="display:none;">
+    <h2 id="name"></h2>
+    <p><strong>Population:</strong> <span id="population"></span></p>
+    <p><strong>Centre:</strong> Latitude: <span id="latitude"></span>, Longitude: <span id="longitude"></span></p>
+    <p><strong>Description:</strong></p>
+    <p id="description"></p>
+    <p><strong>Force URL:</strong> <a id="url_force" href="#" target="_blank">Visit page</a></p>
+    <div class="links">
+      <p><strong>Related links:</strong></p>
+      <ul id="linksList"></ul>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('neighbourhoodForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const force = document.getElementById('force').value.trim().toLowerCase();
+      const neighbourhood = document.getElementById('neighbourhood').value.trim().toUpperCase();
+      if (!force || !neighbourhood) {
+        alert("Please enter both police force and neighbourhood ID.");
+        return;
+      }
+
+      const url = `https://data.police.uk/api/${force}/${neighbourhood}`;
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Network response was not ok.");
+        const data = await res.json();
+
+        document.getElementById('name').textContent = data.name || "N/A";
+        document.getElementById('population').textContent = data.population || "N/A";
+        document.getElementById('latitude').textContent = data.centre?.latitude || "N/A";
+        document.getElementById('longitude').textContent = data.centre?.longitude || "N/A";
+        document.getElementById('description').textContent = data.description || "N/A";
+        document.getElementById('url_force').href = data.url_force || "#";
+
+        const linksList = document.getElementById('linksList');
+        linksList.innerHTML = '';
+        if (Array.isArray(data.links) && data.links.length) {
+          data.links.forEach(link => {
+            const li = document.createElement('li');
+            li.innerHTML = `<a href="${link.url}" target="_blank">${link.title || link.url}</a> ${link.description ? `- ${link.description}` : ''}`;
+            linksList.appendChild(li);
+          });
+        }
+
+        document.getElementById('result').style.display = 'block';
+      } catch (err) {
+        alert("Error fetching data: " + err.message);
+      }
+    });
+  </script>
+</body>
+</html>

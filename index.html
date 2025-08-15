@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>UK Police Crime</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            background: #111;
+            color: #fff;
+            line-height: 1.6;
+            transition: background 0.3s;
+        }
+        a { color: #ffc107; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* Header & Logo */
+        header {
+            background: #000;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 3px solid #ffc107;
+        }
+        header img {
+            height: 50px;
+        }
+        header h1 {
+            margin: 0;
+            color: #ffc107;
+            font-size: 2em;
+            text-shadow: 1px 1px 3px #000;
+        }
+
+        /* Form Section */
+        .form-container {
+            background: #222;
+            padding: 20px;
+            margin: 20px auto;
+            border-radius: 10px;
+            max-width: 500px;
+            box-shadow: 0 0 10px #ffc107;
+            transition: transform 0.2s;
+        }
+        .form-container:hover { transform: scale(1.02); }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border-radius: 5px;
+            border: none;
+        }
+        button {
+            background: #ffc107;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px;
+            transition: background 0.3s, transform 0.2s;
+        }
+        button:hover {
+            background: #e0a800;
+            transform: scale(1.05);
+        }
+
+        /* Table Styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 10px #ffc10744;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background: #000;
+            color: #ffc107;
+        }
+        tr:nth-child(even) {
+            background: #222;
+        }
+        tr:hover {
+            background: #333;
+        }
+
+        /* Navigation */
+        nav {
+            background: #000;
+            padding: 10px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            border-bottom: 3px solid #ffc107;
+        }
+        nav a {
+            background: #222;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        nav a:hover {
+            background: #333;
+        }
+
+        /* Error Messages */
+        .error {
+            color: #ff4c4c;
+            font-weight: bold;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <img src="UKPD_1.png" alt="Logo">
+    <h1><i class="fas fa-shield-alt"></i> UK Police Crime</h1>
+</header>
+
+<nav>
+    <a href="forces.html"><i class="fas fa-university"></i> Forces</a>
+    <a href="senior-officers.html"><i class="fas fa-user-tie"></i> Senior Officers</a>
+    <a href="outcomes.html"><i class="fas fa-check-circle"></i> Outcomes</a>
+    <a href="crimes-at-location.html"><i class="fas fa-map-marker-alt"></i> Crimes at Location</a>
+    <a href="Find_location_IDs.html"><i class="fas fa-search-location"></i> Find Location IDs</a>
+    <a href="crimes_no_location.html"><i class="fas fa-question-circle"></i> Crimes w/No Location</a>
+    <a href="crime_categories.html"><i class="fas fa-list-alt"></i> Crime Categories</a>
+    <a href="list_of_neighborhoods.html"><i class="fas fa-city"></i> Neighborhoods</a>
+    <a href="Neighbourhood_Boundary.html"><i class="fas fa-border-style"></i> Boundaries</a>
+    <a href="Specific_Neighbourhood.html"><i class="fas fa-map"></i> Specific Neighborhood</a>
+    <a href="Neighbourhood_Team.html"><i class="fas fa-users"></i> Teams</a>
+    <a href="Neighbourhood_Events.html"><i class="fas fa-calendar-alt"></i> Events</a>
+    <a href="Neighbourhood_Priorities.html"><i class="fas fa-bullseye"></i> Priorities</a>
+    <a href="Locate_Neighbourhood.html"><i class="fas fa-location-arrow"></i> Locate</a>
+    <a href="Stop and Searches by Area.html"><i class="fas fa-search"></i> Stop & Searches by Area</a>
+    <a href="Stop and Searches by Location.html"><i class="fas fa-map-pin"></i> by Location</a>
+    <a href="Stop and Searches with No Location.html"><i class="fas fa-question"></i> w/No Location</a>
+    <a href="Stop and Searches by Force.html"><i class="fas fa-balance-scale"></i> by Force</a>
+</nav>
+
+<div class="form-container">
+    <label for="lat"><i class="fas fa-map-marker-alt"></i> Latitude:</label>
+    <input type="text" id="lat" placeholder="52.629729" value="52.629729">
+    
+    <label for="lng"><i class="fas fa-map-marker-alt"></i> Longitude:</label>
+    <input type="text" id="lng" placeholder="-1.131592" value="-1.131592">
+    
+    <label for="date"><i class="fas fa-calendar-alt"></i> Date (YYYY-MM):</label>
+    <input type="text" id="date" placeholder="2024-01">
+    
+    <button id="fetchCrimesBtn"><i class="fas fa-search"></i> Fetch Crimes</button>
+</div>
+
+<div id="crimeOutput"></div>
+
+<script>
+    document.getElementById('fetchCrimesBtn').addEventListener('click', async () => {
+        const lat = document.getElementById('lat').value.trim();
+        const lng = document.getElementById('lng').value.trim();
+        const date = document.getElementById('date').value.trim();
+        const output = document.getElementById('crimeOutput');
+
+        if (!lat || !lng) {
+            output.innerHTML = '<p class="error">Latitude and Longitude are required.</p>';
+            return;
+        }
+
+        let url = `https://data.police.uk/api/crimes-street/all-crime?lat=${lat}&lng=${lng}`;
+        if (date) url += `&date=${date}`;
+        output.innerHTML = "<p>Loading...</p>";
+
+        try {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            const data = await res.json();
+
+            if (data.length === 0) {
+                output.innerHTML = "<p>No crimes found for this location/date.</p>";
+                return;
+            }
+
+            let table = `<table>
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Street</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
+                        <th>Month</th>
+                        <th>Outcome</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+            data.forEach(crime => {
+                table += `<tr>
+                    <td>${crime.category}</td>
+                    <td>${crime.location.street.name}</td>
+                    <td>${crime.location.latitude}</td>
+                    <td>${crime.location.longitude}</td>
+                    <td>${crime.month}</td>
+                    <td>${crime.outcome_status ? crime.outcome_status.category : "N/A"}</td>
+                </tr>`;
+            });
+
+            table += "</tbody></table>";
+            output.innerHTML = table;
+
+        } catch (error) {
+            output.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+        }
+    });
+</script>
+
+</body>
+</html>
+
+

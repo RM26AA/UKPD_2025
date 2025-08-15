@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Crime Categories - UK Police API</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* Body & Fonts */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #111;
+      color: #fff;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #000;
+      padding: 15px 30px;
+      border-bottom: 3px solid #FFD700;
+      animation: slideDown 1s ease-out;
+    }
+
+    header img {
+      height: 50px;
+    }
+
+    header h1 {
+      color: #FFD700;
+      font-size: 1.8em;
+    }
+
+    @keyframes slideDown {
+      from {transform: translateY(-50px); opacity: 0;}
+      to {transform: translateY(0); opacity: 1;}
+    }
+
+    /* Back link */
+    a.back-link {
+      display: inline-block;
+      margin: 15px 30px;
+      color: #FFD700;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+
+    a.back-link:hover {
+      color: #fff;
+    }
+
+    /* Form styling */
+    .form-group {
+      margin: 20px 30px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    input {
+      padding: 6px;
+      margin-top: 4px;
+      width: 150px;
+      border-radius: 5px;
+      border: none;
+      outline: none;
+    }
+
+    button {
+      padding: 8px 15px;
+      margin-top: 10px;
+      background: #FFD700;
+      color: #000;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    /* Table Styling */
+    table {
+      width: 95%;
+      margin: 20px auto;
+      border-collapse: collapse;
+      background: #222;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+    }
+
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #444;
+    }
+
+    th {
+      background: #000;
+      color: #FFD700;
+    }
+
+    tr:hover {
+      background: #333;
+      transition: background 0.3s;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      table, th, td {
+        font-size: 12px;
+      }
+
+      input {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="UKPD_1.png" alt="Logo"> <!-- Add your logo -->
+    <h1>Crime Categories</h1>
+  </header>
+
+  <a class="back-link" href="index.html"><i class="fas fa-arrow-left"></i> Back to Main Page</a>
+
+  <div class="form-group">
+    <form id="categoriesForm">
+      <label>
+        Date (YYYY-MM):
+        <input type="text" id="date" placeholder="e.g., 2024-01">
+      </label>
+      <button type="submit"><i class="fas fa-search"></i> Get Categories</button>
+    </form>
+  </div>
+
+  <table id="categoriesTable" style="display:none;">
+    <thead>
+      <tr>
+        <th>URL</th>
+        <th>Name</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    document.getElementById('categoriesForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const date = document.getElementById('date').value.trim();
+      if (!date) {
+        alert("Please enter a date in YYYY-MM format.");
+        return;
+      }
+
+      const url = `https://data.police.uk/api/crime-categories?date=${date}`;
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Network response was not ok.");
+        const data = await res.json();
+
+        const tbody = document.querySelector('#categoriesTable tbody');
+        tbody.innerHTML = '';
+
+        data.forEach(cat => {
+          const row = document.createElement('tr');
+          row.innerHTML = `<td>${cat.url}</td><td>${cat.name}</td>`;
+          tbody.appendChild(row);
+        });
+
+        document.getElementById('categoriesTable').style.display = data.length ? '' : 'none';
+      } catch (err) {
+        alert("Error fetching data: " + err.message);
+      }
+    });
+  </script>
+</body>
+</html>

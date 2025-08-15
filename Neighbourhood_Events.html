@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Neighbourhood Events - UK Police API</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #111;
+      color: #fff;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #000;
+      padding: 15px 30px;
+      border-bottom: 3px solid #FFD700;
+      animation: slideDown 1s ease-out;
+    }
+
+    header h1 {
+      color: #FFD700;
+      font-size: 1.8em;
+    }
+
+    @keyframes slideDown {
+      from {transform: translateY(-50px); opacity: 0;}
+      to {transform: translateY(0); opacity: 1;}
+    }
+
+    a.back-link {
+      display: inline-block;
+      margin: 15px 30px;
+      color: #FFD700;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+
+    a.back-link:hover {
+      color: #fff;
+    }
+
+    .form-group {
+      margin: 20px 30px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    input {
+      padding: 6px;
+      margin-top: 4px;
+      width: 220px;
+      border-radius: 5px;
+      border: none;
+      outline: none;
+    }
+
+    button {
+      padding: 8px 15px;
+      margin-top: 10px;
+      background: #FFD700;
+      color: #000;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    .result {
+      background: #222;
+      margin: 20px 30px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+    }
+
+    .result h2 {
+      color: #FFD700;
+    }
+
+    .event {
+      border: 1px solid #444;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      background: #1a1a1a;
+      transition: transform 0.2s;
+    }
+
+    .event:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 10px #FFD700;
+    }
+
+    .event h3 {
+      margin: 0 0 5px 0;
+      color: #FFD700;
+    }
+
+    .event p {
+      margin: 5px 0;
+      color: #fff;
+    }
+
+    @media (max-width: 600px) {
+      input {
+        width: 100%;
+      }
+
+      .result {
+        margin: 20px 10px;
+        padding: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Neighbourhood Events</h1>
+  </header>
+
+  <a class="back-link" href="index.html"><i class="fas fa-arrow-left"></i> Back to Main Page</a>
+
+  <div class="form-group">
+    <form id="eventsForm">
+      <label>
+        Police Force (e.g., leicestershire):
+        <input type="text" id="force" placeholder="Enter police force">
+      </label>
+      <label>
+        Neighbourhood ID (e.g., NC04):
+        <input type="text" id="neighbourhood" placeholder="Enter neighbourhood ID">
+      </label>
+      <button type="submit"><i class="fas fa-calendar"></i> Get Events</button>
+    </form>
+  </div>
+
+  <div class="result" id="result" style="display:none;">
+    <h2>Events</h2>
+    <div id="eventsList"></div>
+  </div>
+
+  <script>
+    document.getElementById('eventsForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const force = document.getElementById('force').value.trim().toLowerCase();
+      const neighbourhood = document.getElementById('neighbourhood').value.trim().toUpperCase();
+      if (!force || !neighbourhood) {
+        alert("Please enter both police force and neighbourhood ID.");
+        return;
+      }
+
+      const url = `https://data.police.uk/api/${force}/${neighbourhood}/events`;
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Network response was not ok.");
+        const data = await res.json();
+
+        const eventsList = document.getElementById('eventsList');
+        eventsList.innerHTML = '';
+
+        if (Array.isArray(data) && data.length) {
+          data.forEach(event => {
+            const div = document.createElement('div');
+            div.className = 'event';
+            div.innerHTML = `
+              <h3>${event.title || "N/A"}</h3>
+              <p><strong>Type:</strong> ${event.type || "N/A"}</p>
+              <p><strong>Start:</strong> ${event.start_date ? new Date(event.start_date).toLocaleString() : "N/A"}</p>
+              <p><strong>End:</strong> ${event.end_date ? new Date(event.end_date).toLocaleString() : "N/A"}</p>
+              <p><strong>Address:</strong> ${event.address || "N/A"}</p>
+              ${event.description ? `<p>${event.description}</p>` : ''}
+            `;
+            eventsList.appendChild(div);
+          });
+        } else {
+          eventsList.innerHTML = '<p>No events found.</p>';
+        }
+
+        document.getElementById('result').style.display = 'block';
+      } catch (err) {
+        alert("Error fetching data: " + err.message);
+      }
+    });
+  </script>
+</body>
+</html>

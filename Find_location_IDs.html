@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Find Location IDs - UK Police API</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* Body & Fonts */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #111;
+      color: #fff;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #000;
+      padding: 15px 30px;
+      border-bottom: 3px solid #FFD700;
+      animation: slideDown 1s ease-out;
+    }
+
+    header img {
+      height: 50px;
+    }
+
+    header h1 {
+      color: #FFD700;
+      font-size: 1.8em;
+    }
+
+    @keyframes slideDown {
+      from {transform: translateY(-50px); opacity: 0;}
+      to {transform: translateY(0); opacity: 1;}
+    }
+
+    /* Back link */
+    a.back-link {
+      display: inline-block;
+      margin: 15px 30px;
+      color: #FFD700;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+
+    a.back-link:hover {
+      color: #fff;
+    }
+
+    /* Form styling */
+    .form-group {
+      margin: 20px 30px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+
+    input {
+      padding: 6px;
+      margin-top: 4px;
+      width: 220px;
+      border-radius: 5px;
+      border: none;
+      outline: none;
+    }
+
+    button {
+      padding: 8px 15px;
+      margin-top: 10px;
+      background: #FFD700;
+      color: #000;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: transform 0.2s;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    /* Table Styling */
+    table {
+      width: 95%;
+      margin: 20px auto;
+      border-collapse: collapse;
+      background: #222;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+    }
+
+    th, td {
+      padding: 12px 15px;
+      text-align: left;
+      border-bottom: 1px solid #444;
+    }
+
+    th {
+      background: #000;
+      color: #FFD700;
+    }
+
+    tr:hover {
+      background: #333;
+      transition: background 0.3s;
+    }
+
+    td button {
+      background: #FFD700;
+      color: #000;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      padding: 5px 10px;
+    }
+
+    td button:hover {
+      transform: scale(1.05);
+    }
+
+    /* Error & alerts */
+    .alert {
+      color: #FF4C4C;
+      margin: 20px 30px;
+      font-weight: bold;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      table, th, td {
+        font-size: 12px;
+      }
+
+      input {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="UKPD_1.png" alt="Logo"> <!-- Add your logo here -->
+    <h1>Find Location IDs</h1>
+  </header>
+
+  <a class="back-link" href="index.html"><i class="fas fa-arrow-left"></i> Back to Main Page</a>
+
+  <div class="form-group">
+    <form id="locationForm">
+      <label>
+        Latitude:
+        <input type="text" id="lat" required>
+      </label>
+      <label>
+        Longitude:
+        <input type="text" id="lng" required>
+      </label>
+      <label>
+        Date (YYYY-MM) [optional]:
+        <input type="text" id="date">
+      </label>
+      <button type="submit"><i class="fas fa-map-marker-alt"></i> Get Location IDs</button>
+    </form>
+  </div>
+
+  <table id="resultsTable" style="display:none;">
+    <thead>
+      <tr>
+        <th>Location ID</th>
+        <th>Street Name</th>
+        <th>Copy</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    document.getElementById('locationForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const lat = document.getElementById('lat').value.trim();
+      const lng = document.getElementById('lng').value.trim();
+      const date = document.getElementById('date').value.trim();
+      const resultsTable = document.getElementById('resultsTable');
+
+      if (!lat || !lng) {
+        alert("Please enter both latitude and longitude.");
+        return;
+      }
+
+      let url = `https://data.police.uk/api/crimes-street/all-crime?lat=${lat}&lng=${lng}`;
+      if (date) url += `&date=${date}`;
+
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error("Network response was not ok.");
+        const data = await res.json();
+
+        const locationMap = {};
+        data.forEach(item => {
+          if (item.location && item.location.street) {
+            const id = item.location.street.id;
+            const name = item.location.street.name;
+            if (!locationMap[id]) locationMap[id] = name;
+          }
+        });
+
+        const sortedLocations = Object.entries(locationMap)
+          .sort((a, b) => a[1].localeCompare(b[1]));
+
+        const tbody = resultsTable.querySelector('tbody');
+        tbody.innerHTML = '';
+        sortedLocations.forEach(([id, name]) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${id}</td>
+            <td>${name}</td>
+            <td><button onclick="copyToClipboard('${id}')"><i class="fas fa-copy"></i> Copy ID</button></td>
+          `;
+          tbody.appendChild(row);
+        });
+
+        resultsTable.style.display = sortedLocations.length ? '' : 'none';
+      } catch (err) {
+        alert("Error fetching data: " + err.message);
+      }
+    });
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text)
+        .then(() => alert(`Copied: ${text}`))
+        .catch(err => alert("Failed to copy: " + err));
+    }
+  </script>
+</body>
+</html>
+

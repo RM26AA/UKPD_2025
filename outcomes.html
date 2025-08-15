@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Street-Level Outcomes - UK Police API</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        /* Body & Fonts */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #111;
+            color: #fff;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #000;
+            padding: 15px 30px;
+            border-bottom: 3px solid #FFD700;
+            animation: slideDown 1s ease-out;
+        }
+
+        header img {
+            height: 50px;
+        }
+
+        header h1 {
+            color: #FFD700;
+            font-size: 1.8em;
+        }
+
+        @keyframes slideDown {
+            from {transform: translateY(-50px); opacity: 0;}
+            to {transform: translateY(0); opacity: 1;}
+        }
+
+        /* Back link */
+        a.back-link {
+            display: inline-block;
+            margin: 15px 30px;
+            color: #FFD700;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        a.back-link:hover {
+            color: #fff;
+        }
+
+        /* Input form */
+        .form-group {
+            margin: 20px 30px;
+        }
+
+        label {
+            display: inline-block;
+            width: 120px;
+        }
+
+        input {
+            padding: 5px;
+            margin: 5px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+        }
+
+        button {
+            padding: 8px 15px;
+            margin-top: 10px;
+            background: #FFD700;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        /* Table Styling */
+        table {
+            width: 95%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: #222;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #444;
+        }
+
+        th {
+            background: #000;
+            color: #FFD700;
+        }
+
+        tr:hover {
+            background: #333;
+            transition: background 0.3s;
+            cursor: pointer;
+        }
+
+        /* Loading & Errors */
+        .error, #outcomesOutput p {
+            color: #FF4C4C;
+            margin: 20px 30px;
+            font-weight: bold;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            table, th, td {
+                font-size: 12px;
+            }
+
+            label {
+                display: block;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="UKPD_1.png" alt="Logo"> <!-- Add your logo image here -->
+        <h1>Street-Level Outcomes</h1>
+    </header>
+
+    <a class="back-link" href="index.html"><i class="fas fa-arrow-left"></i> Back to Main Page</a>
+
+    <div class="form-group">
+        <label for="lat">Latitude:</label>
+        <input type="text" id="lat" placeholder="52.629729" value="52.629729"><br>
+        <label for="lng">Longitude:</label>
+        <input type="text" id="lng" placeholder="-1.131592" value="-1.131592"><br>
+        <label for="date">Date (YYYY-MM):</label>
+        <input type="text" id="date" placeholder="2024-01"><br>
+        <button id="fetchOutcomesBtn"><i class="fas fa-map-marker-alt"></i> Fetch Outcomes</button>
+    </div>
+
+    <div id="outcomesOutput"></div>
+
+    <script>
+        document.getElementById('fetchOutcomesBtn').addEventListener('click', async () => {
+            const lat = document.getElementById('lat').value.trim();
+            const lng = document.getElementById('lng').value.trim();
+            const date = document.getElementById('date').value.trim();
+            const output = document.getElementById('outcomesOutput');
+
+            if (!lat || !lng) {
+                output.innerHTML = '<p class="error">Latitude and Longitude are required.</p>';
+                return;
+            }
+
+            let url = `https://data.police.uk/api/outcomes-at-location?lat=${lat}&lng=${lng}`;
+            if (date) url += `&date=${date}`;
+
+            output.innerHTML = "<p>Loading...</p>";
+
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+
+                const data = await res.json();
+                if (data.length === 0) {
+                    output.innerHTML = "<p>No outcomes found for this location/date.</p>";
+                    return;
+                }
+
+                let table = `<table>
+                    <thead>
+                        <tr>
+                            <th>Outcome</th>
+                            <th>Outcome Date</th>
+                            <th>Crime Category</th>
+                            <th>Street</th>
+                            <th>Latitude</th>
+                            <th>Longitude</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+
+                data.forEach(item => {
+                    const crime = item.crime || {};
+                    const location = crime.location || {};
+                    table += `<tr>
+                        <td>${item.category ? item.category.name : "N/A"}</td>
+                        <td>${item.date || "N/A"}</td>
+                        <td>${crime.category || "N/A"}</td>
+                        <td>${location.street ? location.street.name : "N/A"}</td>
+                        <td>${location.latitude || "N/A"}</td>
+                        <td>${location.longitude || "N/A"}</td>
+                    </tr>`;
+                });
+
+                table += "</tbody></table>";
+                output.innerHTML = table;
+
+            } catch (error) {
+                output.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        });
+    </script>
+</body>
+</html>
