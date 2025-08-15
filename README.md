@@ -1,4 +1,4 @@
-### UK Police Data Explorer
+# UK Police Data Explorer
 
 A web-based application that allows users to explore live data from the UK Police API.
 The tool provides easy-to-use pages for viewing crime reports, stop-and-search statistics, and neighbourhood information across the UK.
